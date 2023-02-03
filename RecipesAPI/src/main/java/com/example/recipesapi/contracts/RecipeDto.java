@@ -1,5 +1,6 @@
 package com.example.recipesapi.contracts;
 
+import com.example.recipesapi.models.Rating;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -15,6 +16,6 @@ public class RecipeDto {
     private Integer id;
     private String name;
     private String description;
-
+    private int rating;
 
 }

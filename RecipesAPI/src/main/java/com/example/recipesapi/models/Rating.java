@@ -22,8 +22,8 @@ public class Rating {
     @OneToMany(mappedBy = "id")
     private List<Recipe> recipes;
 
-    public Rating(Integer id, int rating) {
-        this.id = id;
+    public Rating(int rating) {
+        this.id = rating;
         this.rating = rating;
     }
 }

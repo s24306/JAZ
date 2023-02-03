@@ -23,6 +23,11 @@ public class UserController {
         return userService.getAll();
     }
 
+    @RequestMapping(value = "api/v1/recipes", method = RequestMethod.GET)
+    public List<RecipeDto> getAllRecipes() {
+        return userService.getAllRecipes();
+    }
+
     @RequestMapping(value = "api/v1/user", method = RequestMethod.POST)
     public ResponseEntity<String> save(@RequestBody UsernameDto usernameDto) {
         return userService.save(usernameDto);
@@ -34,7 +39,6 @@ public class UserController {
         return userService.getAll().stream()
                 .filter(usernameDto -> usernameDto.getId().equals(id))
                 .findAny().orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "user not found"));
-
     }
 
 
@@ -53,7 +57,16 @@ public class UserController {
         if (userService.getUserRepository().findById(id).isEmpty()) {
             throw new ResponseStatusException(NOT_FOUND, "user not found");
         } else {
-            userService.delete(id);
+            userService.deleteUser(id);
+        }
+    }
+
+    @RequestMapping(value = "api/v1/user/{id}/recipe/{id2}", method = RequestMethod.DELETE)
+    public void deleteRecipe(@PathVariable Integer id, @PathVariable Integer id2) {
+        if (userService.getRecipeRepository().findById(id).isEmpty()) {
+            throw new ResponseStatusException(NOT_FOUND, "recipe not found");
+        } else {
+            userService.deleteRecipe(id, id2);
         }
     }
 

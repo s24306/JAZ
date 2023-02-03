@@ -4,6 +4,7 @@ import com.example.recipesapi.Messages.ErrorMessages;
 import com.example.recipesapi.Messages.SuccessMessages;
 import com.example.recipesapi.contracts.RecipeDto;
 import com.example.recipesapi.contracts.UsernameDto;
+import com.example.recipesapi.models.Rating;
 import com.example.recipesapi.models.Recipe;
 import com.example.recipesapi.models.Username;
 import com.example.recipesapi.repositories.RecipeRepo;
@@ -41,6 +42,14 @@ public class UserService {
         return usernameDtoList;
     }
 
+    public List<RecipeDto> getAllRecipes() {
+        List<RecipeDto> recipeDtoList = new ArrayList<>();
+        for (Recipe recipe : recipeRepository.findAll()) {
+            recipeDtoList.add(new RecipeDto(recipe.getId(), recipe.getName(), recipe.getDescription(), recipe.getRating().getRating()));
+        }
+        return recipeDtoList;
+    }
+
     public ResponseEntity<String> save(UsernameDto usernameDto) {
         ResponseEntity response;
         List<Username> user = userRepository.findAll().stream()
@@ -63,16 +72,29 @@ public class UserService {
         }
     }
 
-    public void delete(int userId) {
+    public void deleteUser(int userId) {
         userRepository.findById(userId).ifPresent(person -> userRepository.deleteById(userId));
+    }
+
+    public void deleteRecipe(int userId, int recipeId) {
+        var user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            List<Recipe> recipes = user.getRecipes().stream().filter(
+                    s -> s.getId() != recipeId).collect(Collectors.toList());
+            user.setRecipes(recipes);
+            userRepository.save(user);
+            recipeRepository.findById(recipeId).ifPresent(recipe -> recipeRepository.deleteById(recipeId));
+        }
     }
 
 
     public void addRecipe(int userId, RecipeDto recipeDto) {
         var user = userRepository.findById(userId).orElse(null);
         if (user != null) {
+            Rating rating = new Rating(recipeDto.getRating());
             var recipe = new Recipe(recipeDto.getId(), recipeDto.getName(), recipeDto.getDescription());
             recipe.setUsername(user);
+            recipe.setRating(rating);
             user.getRecipes().add(recipe);
             recipeRepository.save(recipe);
             userRepository.save(user);
@@ -83,9 +105,9 @@ public class UserService {
         List<RecipeDto> recipeDtoList = new ArrayList<>();
         var user = userRepository.findById(userId).orElse(null);
         if (user != null) {
-            var recipes = user.getRecipes();
+            List<Recipe> recipes = user.getRecipes();
             for (Recipe recipe : recipes) {
-                recipeDtoList.add(new RecipeDto(recipe.getId(), recipe.getName(), recipe.getDescription()));
+                recipeDtoList.add(new RecipeDto(recipe.getId(), recipe.getName(), recipe.getDescription(), recipe.getRating().getRating()));
             }
         }
         return recipeDtoList;

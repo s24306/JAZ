@@ -24,7 +24,7 @@ public class Username {
     private String login;
     private String email;
 
-    @OneToMany(mappedBy = "id")
+    @OneToMany(mappedBy = "username")
     private List<Recipe> recipes;
 
     public Username(Integer id, String login, String email) {
